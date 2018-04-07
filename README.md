@@ -1,2 +1,1 @@
-# ML-using-Python
-Implementation of basic ML algorithms
+[Why Cross-validation?](https://www.r-bloggers.com/cross-validation-for-predictive-analytics-using-r/)
