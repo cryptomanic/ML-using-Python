@@ -1,3 +1,9 @@
+---
+title: "Overfitting"
+output:
+  html_document: default
+---
+
 ```{r}
 set.seed(1996)
 N <- 3
