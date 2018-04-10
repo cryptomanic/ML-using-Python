@@ -1,0 +1,41 @@
+```{r}
+set.seed(1996)
+N <- 3
+```
+
+```{R}
+x <- sort(runif(3*N, min = 1, max = N))
+eps <- rnorm(3*N, 0, .1)
+b <- c(1, 0.1, 0.01, 0.001)
+y <- sapply(X = x, FUN = function(x) b[1] + b[2]*x + b[3]*x*x + b[4]*x*x*x)
+y <- y + eps
+```
+
+```{R}
+df <- as.data.frame(poly(x, degree = 1000, raw = TRUE))
+colnames(df) <- paste('x', 1:1000, sep = '')
+df <- cbind(y = y, df)
+
+xd <- seq(from = 1, to = N, by = 0.01)
+tdata <- as.data.frame(poly(xd, degree = 1000, raw = TRUE))
+colnames(tdata) <- paste('x', 1:1000, sep = '')
+```
+
+```{R}
+plot(x, y, type = "p", cex = 0.6, pch = 19)
+
+# trying to fit polynomial of different degree
+lines(xd, predict(lm(y ~ ., data = df[1:3]), newdata = tdata), 'l', col = "blue")
+lines(xd, predict(lm(y ~ ., data = df[1:4]), newdata = tdata), 'l', col = "purple")
+lines(xd, predict(lm(y ~ ., data = df[1:5]), newdata = tdata), 'l', col = "brown")
+lines(xd, predict(lm(y ~ ., data = df[1:8]), newdata = tdata), 'l', col = "orange")
+
+# actual fit
+lines(xd, sapply(X = xd, FUN = function(x) b[1] + b[2]*x + b[3]*x*x + b[4]*x*x*x), 'l', col = "red")
+
+legend(x = "top", legend = c("degree-2", "degree-3", "degree-4", "degree-7", "actual distribution"), 
+       col = c("blue", "purple", "brown", "orange", "red"), cex = 0.9, pch = 19)
+```
+```
+The red colour curve is the actual distribution from which points were chosen (noise is present in the input data). With the increase in the degree (hence complexity) of the fitting polynomial, the model also learnt the noise in the data, which led to overfitting (see orange colour curve of degree 7).
+```
