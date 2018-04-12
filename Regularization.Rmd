@@ -1,0 +1,51 @@
+---
+title: "Regularization"
+output: html_notebook
+---
+
+```{r}
+set.seed(1996)
+N <- 3
+```
+
+```{R}
+x <- sort(runif(3*N, min = 1, max = N))
+eps <- rnorm(3*N, 0, .1)
+b <- c(1, 0.1, 0.01, 0.001)
+y <- sapply(X = x, FUN = function(x) b[1] + b[2]*x + b[3]*x*x + b[4]*x*x*x)
+y <- y + eps
+```
+
+```{R}
+df <- as.data.frame(poly(x, degree = 7, raw = TRUE))
+colnames(df) <- paste('x', 1:7, sep = '')
+df <- cbind(y = y, df)
+
+xd <- seq(from = 1, to = N, by = 0.01)
+tdata <- as.data.frame(poly(xd, degree = 7, raw = TRUE))
+colnames(tdata) <- paste('x', 1:7, sep = '')
+```
+
+```{R}
+plot(x, y, type = "p", cex = 0.6, pch = 19)
+
+# trying to fit polynomial of degree 7 (overfitting scenario)
+lines(xd, predict(lm(y ~ ., data = df[1:8]), newdata = tdata), 'l', col = "orange")
+
+# actual fit
+lines(xd, sapply(X = xd, FUN = function(x) b[1] + b[2]*x + b[3]*x*x + b[4]*x*x*x), 'l', col = "red")
+
+# perform regularization
+library(glmnet)
+x_ <- as.matrix(df[, -1])
+y_ <- df[, 1]
+
+# alpha : (0 for ridge) (1 for lasso)
+fit <- glmnet(x_, y_, "gaussian", alpha = 0, standardize = TRUE)
+
+#lines(xd, predict(fit, newx = as.matrix(tdata), type = "response", s = fit$lambda[28])[, 1], 'l', col = "green")
+
+fit <- cv.glmnet(x_, y_, family = "gaussian", alpha = 1, standardize = TRUE, type.measure = "mse", nfolds = 3)
+
+lines(xd, predict(fit, newx = as.matrix(tdata), type = "response", s = fit$lambda.min)[, 1], 'l', col = "green")
+```
